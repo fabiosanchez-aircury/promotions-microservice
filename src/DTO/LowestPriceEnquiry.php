@@ -113,4 +113,9 @@ class LowestPriceEnquiry implements PromotionEnquiryInterface
     }
 
 
+    // To serialize to JSON all properties
+    public function jsonSerialize()
+    {
+        return get_object_vars($this);
+    }
 }
