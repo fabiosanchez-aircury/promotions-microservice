@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\DTO\LowestPriceEnquiry;
 use App\Filter\PromotionsFilterInterface;
+use App\Repository\ProductRepository;
 use App\Service\Serializer\DTOSerializer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,6 +14,10 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends AbstractController
 {
+    public function __construct(private ProductRepository $repository)
+    {
+    }
+
     #[Route('/products/{id}/lowest-price', name: 'product_lowest_price', methods: ['POST'])]
     public function lowestPrice(Request $request, int $id, DTOSerializer $serializer, PromotionsFilterInterface $promotionsFilter): Response
     {
@@ -26,8 +31,11 @@ class ProductController extends AbstractController
         /** @var LowestPriceEnquiry $lowestPriceEnquiry */
         $lowestPriceEnquiry = $serializer->deserialize($request->getContent(), LowestPriceEnquiry::class, 'json');
 
+        $product = $this->repository->find($id); // Add error handling for not found product
+        dd($product);
+
         // 2. Pass the DTO into a promotions filter (the appropriate promotion will be applied)
-        $modifiedEnquiry = $promotionsFilter->apply($lowestPriceEnquiry);
+        $modifiedEnquiry = $promotionsFilter->apply($lowestPriceEnquiry, $promotions);
 
         // 3. Return the modified DTO
 
